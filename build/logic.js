@@ -110,6 +110,18 @@ function rayExit(sx, sy, dx, dy) {
 var FAN = [
   [-Math.PI / 3, R], [-Math.PI / 6, Y], [0, G], [Math.PI / 6, C], [Math.PI / 3, B]
 ];
+function fanSlot(band) {
+  for (var i = 0; i < FAN.length; i++) if (FAN[i][1] === band) return FAN[i][0];
+  return 0;
+}
+/* The splitter inverts the combiner: every color the combiner can produce
+   splits back into its recipe bands. */
+var SPLIT_RECIPES = {};
+SPLIT_RECIPES[Y] = [R, G];
+SPLIT_RECIPES[O] = [R, Y];
+SPLIT_RECIPES[L] = [Y, G];
+SPLIT_RECIPES[T] = [G, C];
+SPLIT_RECIPES[A] = [C, B];
 var PASS_CONE = Math.PI / 7; // ~25.7°: combiner pass-through tolerance
 
 /* Spectral token positions: R=0 O=1 Y=2 L=3 G=4 T=5 C=6 A=7 B=8. */
@@ -196,11 +208,21 @@ function simulate(cells) {
       }
       if (p.t === 'mirror') na = reflectAngle(a, p.a);
       else if (p.t === 'split') {
-        // fan around the prism's own aim: one beam per band present, at its
-        // slot. White (all bands) paints the whole fan. A single primary
-        // band can't split spectrally, so it is duplicated into a pair of
-        // the same color at ±30° around the aim.
-        var sa = p.a || 0, nbands = 0;
+        // fan around the prism's own aim. Anything the combiner can make
+        // (Y/O/L/T/A) splits back into its recipe bands at their fan slots.
+        // Other multi-band light fans one beam per band; a single atomic
+        // band (R/G/C/B) is duplicated into a pair at ±30° around the aim.
+        var sa = p.a || 0;
+        var recipe = SPLIT_RECIPES[c];
+        if (recipe) {
+          for (oi = 0; oi < recipe.length; oi++) {
+            var rbo = sa + fanSlot(recipe[oi]);
+            var rst = stepFrom(ex, ey, rbo, hit);
+            pushRay(rst.x, rst.y, rst.a, recipe[oi]);
+          }
+          return;
+        }
+        var nbands = 0;
         for (oi = 0; oi < FAN.length; oi++) if (c & FAN[oi][1]) nbands++;
         if (nbands <= 1) {
           var stp1 = stepFrom(ex, ey, sa - Math.PI / 6, hit);

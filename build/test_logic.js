@@ -99,15 +99,16 @@ function fanOuts(sim, fx, fy) {
 }
 function segAngle(s) { return Math.atan2(s.y2 - s.y1, s.x2 - s.x1); }
 {
-  // single band from the south, splitter aimed north: pair at north ±30°
+  // yellow splits back into red + green (splitter inverts the combiner)
   const g = cells();
   g[P.key(4, 9)] = P.mkPiece('emit', { a: -Math.PI / 2, col: P.Y });
   place(g, 4, 5, 'split', -Math.PI / 2);
   const outs = fanOuts(P.simulate(g), 4.5, 5.5);
-  ok(outs.length === 2 && outs.every(s => s.c === P.Y), 'spectral yellow -> pair of yellows');
-  ok(outs.some(s => near(segAngle(s), -Math.PI / 2 - Math.PI / 6, 0.02)) &&
-     outs.some(s => near(segAngle(s), -Math.PI / 2 + Math.PI / 6, 0.02)),
-     'pair at aim ±30° regardless of entry direction');
+  ok(outs.length === 2 && outs.some(s => s.c === P.R) && outs.some(s => s.c === P.G),
+     'yellow -> red + green, got ' + outs.length + ' beams');
+  ok(outs.some(s => near(segAngle(s), -Math.PI / 2 - Math.PI / 3, 0.02) && s.c === P.R) &&
+     outs.some(s => near(segAngle(s), -Math.PI / 2, 0.02) && s.c === P.G),
+     'yellow -> red(-60°) + green(0°) around the aim');
 }
 {
   // orange (R|Y) splits back into red + yellow — the user's example
