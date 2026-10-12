@@ -50,7 +50,10 @@ out = (
     + "</body>\n</html>\n"
 )
 
-dest = pathlib.Path.home() / "workspace" / "your_files" / "prism" / "index.html"
+if len(sys.argv) > 1:
+    dest = pathlib.Path(sys.argv[1])
+else:
+    dest = pathlib.Path.home() / "workspace" / "your_files" / "prism" / "index.html"
 dest.parent.mkdir(parents=True, exist_ok=True)
 dest.write_text(out)
 print("wrote", dest, f"({len(out) / 1024:.0f} KB)")
