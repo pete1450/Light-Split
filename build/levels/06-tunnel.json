@@ -1,0 +1,1 @@
+{"fixed":[{"a":1.5465,"col":"G","t":"emit","x":0,"y":0},{"col":"R","t":"recv","x":8,"y":0},{"a":-1.5666,"col":"R","t":"emit","x":0,"y":9},{"col":"G","t":"recv","x":8,"y":9}],"hint":"","id":"l6","inv":{"comb":1,"mirror":4,"split":1},"name":"6 · Tunnel"}

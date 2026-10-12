@@ -226,7 +226,11 @@ function loadLevel(idx) {
     if (p.fixed) state.fixed[P.key(f.x, f.y)] = true;
   }
   state.inv = {};
-  for (var pi = 0; pi < P.PALETTE.length; pi++) state.inv[P.PALETTE[pi]] = Infinity; // unlimited for now
+  for (var pi = 0; pi < P.PALETTE.length; pi++) {
+    var pid = P.PALETTE[pi];
+    // sandbox: unlimited; real levels: only the budgeted pieces
+    state.inv[pid] = lv.sandbox ? Infinity : (lv.inv[pid] || 0);
+  }
   state.paletteSel = null;
   state.selectedCell = -1;
   state.winShown = false;

@@ -269,5 +269,13 @@ function solve(lv, placements) {
   ok(r.done, 'L5 solvable: split, steer G+C into combiner -> teal, got ' + r.ok + '/' + r.total);
 }
 
+{
+  const l6 = P.LEVELS.find(l => l.id === 'l6');
+  ok(l6 && l6.fixed.length === 4, 'L6 loaded with 4 fixed pieces');
+  ok(l6 && l6.inv.mirror === 4 && l6.inv.split === 1 && l6.inv.comb === 1,
+     'L6 budget: 4 mirrors, 1 splitter, 1 combiner');
+  ok(l6 && (l6.inv.emitW || 0) === 0, 'L6: unlisted pieces default to 0');
+}
+
 console.log(`\n${PASS} passed, ${FAIL} failed`);
 process.exit(FAIL ? 1 : 0);
