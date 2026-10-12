@@ -1,0 +1,1 @@
+{"fixed":[{"a":0,"col":"W","t":"emit","x":0,"y":4},{"col":"W","t":"recv","x":9,"y":6},{"t":"wall","x":5,"y":4}],"hint":"The wall blocks the straight shot. Place two mirrors (drag to rotate) and bounce the white beam around it.","id":"l1","inv":{"mirror":2},"name":"1 · First Light"}

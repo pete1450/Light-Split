@@ -1,0 +1,1 @@
+{"fixed":[{"a":0,"col":"W","t":"emit","x":0,"y":7},{"col":"R","t":"recv","x":9,"y":4}],"hint":"The splitter fans white into red/yellow/green/cyan/blue. Steer the red beam home.","id":"l2","inv":{"mirror":2,"split":1},"name":"2 · Split Decision"}

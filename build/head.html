@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Light/Split — light-bending puzzle</title>
+<style>
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#e8edf5;
+    font-family:system-ui,-apple-system,sans-serif;color:#232c45;
+    -webkit-user-select:none;user-select:none;touch-action:none;}
+  #cv{position:fixed;inset:0;width:100%;height:100%;display:block;}
+  .bar{position:fixed;left:0;right:0;display:flex;align-items:center;gap:8px;
+    padding:6px 8px;background:rgba(255,255,255,.94);z-index:10;
+    box-shadow:0 2px 12px rgba(70,90,140,.12);}
+  #topbar{top:0;flex-wrap:wrap;}
+  .chip{background:#eef2fa;border:1px solid #c9d6ec;border-radius:10px;color:#3a4763;
+    padding:3px 8px;font-size:12px;white-space:nowrap;}
+  #lvlname{max-width:44vw;overflow:hidden;text-overflow:ellipsis;font-weight:700;
+    background:linear-gradient(90deg,#d63b2f,#e08a1e,#c9a41e,#3fae4f,#1e9fd8,#3b5fd9);
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .tabs{display:flex;gap:6px;margin-left:auto;}
+  .tab{background:#ffffff;border:1px solid #c9d6ec;border-radius:12px;color:#232c45;
+    font-size:16px;padding:6px 12px;cursor:pointer;box-shadow:0 1px 3px rgba(70,90,140,.1);}
+  .tab.on{background:#e4e9fd;border-color:#4a5fd0;color:#2b3a8f;}
+  #botbar{bottom:0;flex-direction:column;align-items:stretch;gap:6px;
+    padding-bottom:max(6px,env(safe-area-inset-bottom));}
+  #panel{background:rgba(255,255,255,.96);border:1px solid #c9d6ec;border-radius:14px;
+    padding:8px 10px;font-size:13px;display:none;box-shadow:0 2px 10px rgba(70,90,140,.12);}
+  #panel .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  #panel .pname{font-weight:600;}
+  #panel .pdesc{color:#5a6b8c;font-size:12px;flex-basis:100%;}
+  .abtn{background:#4a5fd0;border:1px solid #4a5fd0;border-radius:10px;color:#fff;
+    padding:7px 12px;font-size:13px;cursor:pointer;}
+  .abtn.warn{background:#fdecea;border-color:#e8a0a0;color:#b03a2e;}
+  #palette{display:flex;gap:6px;overflow-x:auto;touch-action:pan-x;padding:2px;}
+  #vdrawer{display:none;position:absolute;left:8px;bottom:calc(100% + 6px);
+    flex-direction:column;gap:6px;
+    background:rgba(255,255,255,.96);border:1px solid #c9d6ec;border-radius:14px;
+    padding:8px;max-height:min(64vh,500px);overflow-y:auto;touch-action:pan-y;
+    box-shadow:0 4px 16px rgba(70,90,140,.16);}
+  #vdrawer.open{display:flex;}
+  #vdrawer .pbtn{display:flex;align-items:center;gap:10px;min-width:180px;
+    text-align:left;padding:8px 12px;}
+  #vdrawer .pbtn .em{display:inline-block;font-size:22px;}
+  #vdrawer .pbtn .cdot{margin:0;flex:0 0 auto;}
+  #vdrawer .pbtn small{font-size:12px;}
+  .pbtn{position:relative;background:#ffffff;border:1px solid #c9d6ec;border-radius:12px;
+    color:#232c45;padding:6px 8px;font-size:12px;cursor:pointer;white-space:nowrap;
+    text-align:center;min-width:62px;flex:0 0 auto;box-shadow:0 1px 3px rgba(70,90,140,.08);}
+  .pbtn .em{font-size:20px;display:block;}
+  .cdot{width:20px;height:20px;border-radius:50%;display:inline-block;vertical-align:middle;
+    border:2px solid rgba(20,30,60,.18);}
+  .pbtn .cdot{display:block;margin:3px auto;}
+  .pbtn small{display:block;font-size:10px;color:#5a6b8c;}
+  .pbtn.on{background:#e4e9fd;border-color:#4a5fd0;}
+  .pbtn.depleted{opacity:.35;}
+  .pbtn .cnt{position:absolute;top:2px;right:4px;font-size:10px;color:#2a8a2a;font-weight:700;}
+  #toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:20;
+    display:flex;flex-direction:column;gap:4px;align-items:center;pointer-events:none;}
+  .tmsg{background:rgba(255,255,255,.95);border:1px solid #c9d6ec;border-radius:10px;color:#232c45;
+    padding:5px 12px;font-size:13px;animation:tfade 2.6s forwards;white-space:nowrap;
+    box-shadow:0 2px 8px rgba(70,90,140,.15);}
+  @keyframes tfade{0%{opacity:0}10%{opacity:1}80%{opacity:1}100%{opacity:0}}
+  .overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
+    z-index:30;background:rgba(45,58,95,.42);}
+  .overlay .card{background:#ffffff;border:1px solid #d8e0f0;border-radius:18px;color:#232c45;
+    padding:20px 22px;max-width:86vw;max-height:80vh;overflow-y:auto;touch-action:pan-y;
+    box-shadow:0 12px 40px rgba(50,70,120,.22);}
+  .overlay h1{margin:0 0 10px;font-size:22px;}
+  .overlay h2{margin:14px 0 6px;font-size:15px;}
+  .overlay p,.overlay li{font-size:13px;color:#3a4763;line-height:1.5;}
+  .overlay ul{margin:4px 0;padding-left:18px;}
+  .lvlrow{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid #c9d6ec;
+    border-radius:12px;margin:6px 0;cursor:pointer;background:#f4f7fd;}
+  .lvlrow.done{border-color:#6ab06a;background:#f0faf0;}
+  .lvlrow .nm{font-weight:600;font-size:14px;}
+  .lvlrow .hn{font-size:11px;color:#5a6b8c;}
+  #banner{display:none;}
+  #banner .card{text-align:center;}
+  #hint{position:fixed;bottom:120px;left:50%;transform:translateX(-50%);z-index:9;
+    background:rgba(255,255,255,.95);border:1px solid #c9d6ec;border-radius:10px;color:#232c45;
+    padding:5px 12px;font-size:12px;display:none;pointer-events:none;white-space:nowrap;}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="topbar" class="bar">
+  <span class="chip" id="lvlname">Light/Split</span>
+  <span class="chip">🎯 <span id="recvtxt">0/0</span></span>
+  <div class="tabs">
+    <button class="tab" id="btnLevels" title="Levels">📋</button>
+    <button class="tab" id="btnJSON" title="Show board as JSON">{ }</button>
+    <button class="tab" id="btnRestart" title="Restart level">⟳</button>
+    <button class="tab" id="btnHelp" title="How to play">?</button>
+  </div>
+</div>
+<div id="toast"></div>
+<div id="hint"></div>
+<div id="botbar" class="bar">
+  <div id="panel"></div>
+  <div id="vdrawer"></div>
+  <div id="palette"></div>
+</div>
+<div id="banner" class="overlay"><div class="card"><h1 id="bh1">✨ Solved!</h1>
+  <p id="bp"></p>
+  <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+    <button class="abtn" id="btnNext">Next level →</button>
+    <button class="abtn" id="btnAgain">Keep tinkering</button>
+  </div></div></div>
+<div id="levelsOv" class="overlay"><div class="card" style="min-width:min(420px,86vw)">
+  <h1>Levels</h1><div id="levellist"></div>
+  <div style="display:flex;justify-content:center;margin-top:10px">
+    <button class="abtn" id="btnCloseLevels">Close</button></div></div></div>
+<div id="helpOv" class="overlay"><div class="card" style="min-width:min(440px,86vw)">
+  <h1>How to play</h1>
+  <p>Light up every <b>receptor 🎯</b> with <b>exactly</b> its color. Pick a piece below, tap a square to place it (the picker deselects after each placement). Tap a placed piece to remove it. Light recomputes instantly.</p>
+  <h2>Controls</h2>
+  <ul>
+    <li>✥ <b>Drag</b> a placed emitter, mirror, splitter, or combiner to rotate it to any angle.</li>
+    <li>🔍 <b>Pinch</b> or <b>mouse wheel</b> to zoom.</li>
+    <li>🔄 <b>Drag the background</b> (off the board) to orbit around the board.</li>
+    <li>🎨 <b>Emitters</b> and <b>Receptors</b> live in drawers — tap the group to expand it upward, then tap a color to pick it.</li>
+  </ul>
+  <h2>Pieces</h2>
+  <ul>
+    <li>🔆🔴🟢🔵 <b>Emitters</b> — fire white or colored light along their aim.</li>
+    <li>🪞 <b>Mirror</b> — reflects light across its line, at any angle.</li>
+    <li>🔺 <b>Splitter prism</b> (drag to aim) — fans light around its aim: red −60°, yellow −30°, green straight, cyan +30°, blue +60°. White paints the whole fan; a primary color is duplicated into a pair at ±30°.</li>
+    <li>🔻 <b>Combiner prism</b> — beams arriving off its arrow merge into one mixed-color beam exiting along the arrow. Beams near the arrow pass straight through.</li>
+    <li><b>Receptors</b> — the goal. Needs exactly its color.</li>
+    <li>🧱 <b>Wall</b> — blocks light. Emitters are opaque too.</li>
+  </ul>
+  <h2>Colors</h2>
+  <p>There are exactly <b>10 colors</b>: five spectral bands (<b>red · yellow · green · cyan · blue</b>), the four in-betweens (<b>orange · lime · teal · azure</b>), and <b>white</b>. The combiner blends whatever arrives into the color at the middle of its spectrum: <b>red + green = yellow</b>, <b>red + yellow = orange</b>, <b>yellow + green = lime</b>, and so on. A mix that doesn't land on a real color (like red + blue) fizzles into nothing — <b>white</b> comes only from <b>red + green + blue</b> or from all five bands at once. The splitter reverses it: orange splits back into red and yellow.</p>
+  <div style="display:flex;justify-content:center;margin-top:10px">
+    <button class="abtn" id="btnCloseHelp">Got it</button></div></div></div>
+<div id="jsonOv" class="overlay"><div class="card" style="min-width:min(560px,92vw)">
+  <h1>Board as JSON</h1>
+  <p>Only <b>fixed</b> 📌 pieces are exported unless you tick the box — handy for saving work-in-progress while designing. Non-fixed pieces are marked <code>"fixed": false</code> so they come back unlocked. Save the JSON under <code>build/levels/</code>, then set <code>id</code>, <code>name</code>, <code>hint</code>, <code>inv</code>.</p>
+  <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3a4763;margin:0 0 8px;cursor:pointer;">
+    <input type="checkbox" id="jsonAll" style="width:16px;height:16px;accent-color:#4a5fd0;">
+    Include non-fixed pieces too (save work-in-progress)
+  </label>
+  <textarea id="jsonTxt" readonly style="width:100%;height:34vh;background:#f4f7fd;color:#232c45;border:1px solid #c9d6ec;border-radius:8px;font-family:monospace;font-size:12px;padding:8px;box-sizing:border-box;"></textarea>
+  <div style="display:flex;justify-content:center;gap:8px;margin-top:10px">
+    <button class="abtn" id="btnCopyJSON">Copy</button>
+    <button class="abtn" id="btnCloseJSON">Close</button></div></div></div>
