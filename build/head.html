@@ -136,12 +136,13 @@
     <button class="abtn" id="btnCloseHelp">Got it</button></div></div></div>
 <div id="jsonOv" class="overlay"><div class="card" style="min-width:min(560px,92vw)">
   <h1>Board as JSON</h1>
-  <p>Only <b>fixed</b> 📌 pieces are exported unless you tick the box — handy for saving work-in-progress while designing. Non-fixed pieces are marked <code>"fixed": false</code> so they come back unlocked. Save the JSON under <code>build/levels/</code>, then set <code>id</code>, <code>name</code>, <code>hint</code>, <code>inv</code>.</p>
+  <p>Copy the board out as a level file — or paste level JSON below and hit <b>Apply</b> to load it onto the board. Only <b>fixed</b> 📌 pieces are exported unless you tick the box.</p>
   <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#3a4763;margin:0 0 8px;cursor:pointer;">
     <input type="checkbox" id="jsonAll" style="width:16px;height:16px;accent-color:#4a5fd0;">
     Include non-fixed pieces too (save work-in-progress)
   </label>
-  <textarea id="jsonTxt" readonly style="width:100%;height:34vh;background:#f4f7fd;color:#232c45;border:1px solid #c9d6ec;border-radius:8px;font-family:monospace;font-size:12px;padding:8px;box-sizing:border-box;"></textarea>
+  <textarea id="jsonTxt" spellcheck="false" style="width:100%;height:34vh;background:#f4f7fd;color:#232c45;border:1px solid #c9d6ec;border-radius:8px;font-family:monospace;font-size:12px;padding:8px;box-sizing:border-box;"></textarea>
   <div style="display:flex;justify-content:center;gap:8px;margin-top:10px">
-    <button class="abtn" id="btnCopyJSON">Copy</button>
-    <button class="abtn" id="btnCloseJSON">Close</button></div></div></div>
+    <button class="abtn" id="btnApplyJSON">Apply</button>
+    <button class="abtn" id="btnCopyJSON" style="background:#fff;color:#4a5fd0;">Copy</button>
+    <button class="abtn" id="btnCloseJSON" style="background:#fff;color:#232c45;border-color:#c9d6ec;">Close</button></div></div></div>

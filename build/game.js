@@ -653,6 +653,47 @@ function refreshJSON() {
   var all = document.getElementById('jsonAll').checked;
   document.getElementById('jsonTxt').value = JSON.stringify(stateToJSON(all), null, 2);
 }
+/* ---------- apply pasted JSON to the board ---------- */
+var JSON_TYPES = { emit: 1, mirror: 1, split: 1, comb: 1, recv: 1, wall: 1 };
+var JSON_COLS = { R: 1, O: 1, Y: 1, L: 1, G: 1, T: 1, C: 1, A: 1, B: 1, W: 1 };
+function validatePiece(f) {
+  if (!f || typeof f !== 'object') return 'not an object';
+  if (!JSON_TYPES[f.t]) return 'bad type "' + f.t + '"';
+  if (!Number.isInteger(f.x) || !Number.isInteger(f.y) || f.x < 0 || f.x > 9 || f.y < 0 || f.y > 9)
+    return 'bad coords';
+  if (f.a !== undefined && typeof f.a !== 'number') return 'bad angle';
+  if (f.col !== undefined && !JSON_COLS[f.col] && typeof f.col !== 'number') return 'bad color';
+  if (f.fixed !== undefined && typeof f.fixed !== 'boolean') return '"fixed" must be true/false';
+  return null;
+}
+function applyJSON() {
+  var lv;
+  try { lv = JSON.parse(document.getElementById('jsonTxt').value); }
+  catch (e) { toast('Invalid JSON: ' + e.message); return; }
+  var arr = Array.isArray(lv) ? lv : lv.fixed;
+  if (!Array.isArray(arr)) { toast('JSON needs a "fixed" array of pieces (or a bare array)'); return; }
+  var norm = P.normalizeLevel({ id: 'x', name: 'x', fixed: arr });
+  var cells = P.emptyCells(), fmap = {};
+  for (var i = 0; i < norm.fixed.length; i++) {
+    var f = arr[i], err = validatePiece(f);
+    if (err) { toast('Piece ' + (i + 1) + ': ' + err); return; }
+    var n = norm.fixed[i];
+    var k = P.key(n.x, n.y);
+    if (cells[k]) { toast('Two pieces on (' + n.x + ',' + n.y + ')'); return; }
+    var p = P.mkPiece(n.t, n);
+    p.fixed = (n.fixed !== false);
+    cells[k] = p;
+    if (p.fixed) fmap[k] = true;
+  }
+  state.cells = cells;
+  state.fixed = fmap;
+  state.selectedCell = -1;
+  closePanel();
+  if (!Array.isArray(lv) && lv.name) document.getElementById('lvlname').textContent = lv.name;
+  refreshPieces(); resim();
+  document.getElementById('jsonOv').style.display = 'none';
+  toast('Board loaded: ' + norm.fixed.length + ' pieces');
+}
 
 /* ---------- chrome ---------- */
 document.getElementById('btnRestart').addEventListener('pointerdown', function (ev) {
@@ -673,6 +714,10 @@ document.getElementById('jsonAll').addEventListener('change', refreshJSON);
 document.getElementById('btnCloseJSON').addEventListener('pointerdown', function (ev) {
   ev.stopPropagation();
   document.getElementById('jsonOv').style.display = 'none';
+});
+document.getElementById('btnApplyJSON').addEventListener('pointerdown', function (ev) {
+  ev.stopPropagation();
+  applyJSON();
 });
 document.getElementById('btnCopyJSON').addEventListener('pointerdown', function (ev) {
   ev.stopPropagation();
@@ -760,7 +805,7 @@ window.__prism = {
   buildPalette: buildPalette,
   renderDrawer: renderDrawer, toggleDrawer: toggleDrawer, GROUPS: GROUPS,
   getOrbit: function () { return orbitA; }, setOrbit: function (a) { orbitA = a; updateOrbit(); },
-  stateToJSON: stateToJSON,
+  stateToJSON: stateToJSON, applyJSON: applyJSON,
   cellAt: function (x, y) { return state.cells[P.key(x, y)]; },
   screenXY: function (x, y) {
     var v = new THREE.Vector3(cellWX(x), 0.6, cellWZ(y)).project(camera);
