@@ -270,11 +270,12 @@ function solve(lv, placements) {
 }
 
 {
-  const l6 = P.LEVELS.find(l => l.id === 'l6');
-  ok(l6 && l6.fixed.length === 4, 'L6 loaded with 4 fixed pieces');
+  const l6 = P.LEVELS.find(l => l.id === 'tunnel');
+  ok(l6 && l6.name === 'Tunnel', 'Tunnel level loaded');
+  ok(l6 && l6.fixed.length === 21, 'Tunnel has 21 fixed pieces, got ' + (l6 && l6.fixed.length));
   ok(l6 && l6.inv.mirror === 4 && l6.inv.split === 1 && l6.inv.comb === 1,
-     'L6 budget: 4 mirrors, 1 splitter, 1 combiner');
-  ok(l6 && (l6.inv.emitW || 0) === 0, 'L6: unlisted pieces default to 0');
+     'Tunnel budget: 4 mirrors, 1 splitter, 1 combiner');
+  ok(l6 && (l6.inv.emitW || 0) === 0, 'Tunnel: unlisted pieces default to 0');
 }
 
 console.log(`\n${PASS} passed, ${FAIL} failed`);
